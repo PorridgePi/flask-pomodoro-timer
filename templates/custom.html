@@ -1,0 +1,10 @@
+{% extends "index.html" %}
+
+{% block scripts %}
+<form name="redirectForm" method="post" action="/">
+    <input type="hidden" name="time" value={{ seconds }} />
+    <input type="hidden" name="isParsed" value="true"/>
+</form>
+
+<script>document.redirectForm.submit()</script>
+{% endblock %}

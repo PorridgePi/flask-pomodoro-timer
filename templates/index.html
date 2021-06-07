@@ -1,0 +1,27 @@
+{% extends "template.html" %}
+
+{% block title %}Pomodoro Timer{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/timer.js') }}"></script>
+<script>
+  var focusTime = {{ focusTime }};
+  var breakTime = {{ breakTime }};
+  var currentTime = focusTime;
+</script>
+{% endblock %}
+
+{% block body %}
+<audio id="alarm">
+  <source src="{{ url_for('static', filename='alarm.mp3') }}">
+</audio>
+
+<div class="timer">
+    <h5 id="time"></h5>
+</div>
+
+<button class="btn center start-btn" id="start-btn" onclick="start()">Start to Focus</button> 
+{% endblock %}
+
+{% block footer %}{% endblock %}

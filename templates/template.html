@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <title>{% block title %}Default title{% endblock %}</title>
+
+        {% block scripts %}
+        {% endblock %}
+    </head>
+    <body>
+        <div id="container">
+            <div>
+                <div class="alignleft">
+                    <a class="btn home-btn" href="{{ url_for('root') }}">Home</a>
+                    <a class="btn settings-btn" href="{{ url_for('settings') }}">Settings</a>
+                    <a class="btn stats-btn" href="{{ url_for('stats') }}">Stats</a>
+                </div>
+                <div class="alignright">
+                        <form method="POST" action="{{ url_for('root') }}" style="display:inline">
+                        <input name="time" class="time-input" placeholder="e.g. 12/30s/20m/2h">
+                        <input type="submit" class="btn" value="Custom Start">
+                    </form>
+                </div>
+            </div>
+
+            <div>
+                {% block body %}
+                {% endblock %}
+            </div>
+
+            {% block footer %}
+            <footer>This is the default footer</footer>
+            {% endblock %}
+    </body>
+</html>
