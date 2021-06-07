@@ -15,7 +15,7 @@ p {
     font-size: 20px;
 }
 
-.error {
+.title {
     position: fixed;
     top: 10%;
     text-align: center;
@@ -66,15 +66,6 @@ p {
 	top: 80%;
 }
 
-.footer {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
-  text-align: center;
-  padding: 10px;
-  border: 1px solid #d5d5d5;
-}
-
 .timer {
     height: 85%;
     display: flex;
@@ -85,7 +76,7 @@ p {
     color: #000000;
 }
 
-.time-input {
+.input {
     width: 150px;
     height: 32px;
     border-radius: 5px;
@@ -97,4 +88,30 @@ p {
 
 .alignright {
     float: right
+}
+
+.form {
+    font-size: 20px;
+    text-align: center;
+}
+
+.column {
+    float: left;
+    width: 200px;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.column {
+    flex: 50%;
 }

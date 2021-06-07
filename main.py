@@ -1,20 +1,42 @@
-import flask
-import json
-import re
-from flask import render_template, request
+import flask, json, re, os
+from flask import render_template, request, url_for, redirect
 
 app = flask.Flask(__name__)
+
+def openJSON():
+    if os.path.exists("data.json"):
+        with open("data.json", 'r') as f:
+            try:
+                db = json.load(f)
+            except json.decoder.JSONDecodeError:
+                os.remove("data.json") # could prompt for download next time before removing
+                return render_template("error.html", error="JSON config file is corrupted.")
+    else:
+        db = {
+            "settings": {
+                "focusTime": 1500, # default focusTime = 25 minutes
+                "breakTime": 300   # default breakTime = 5 minutes
+            }
+        }
+
+    return db
+
+def saveJSON(db):
+    with open('data.json', 'w') as f:
+        json.dump(db, f, indent=4, sort_keys=True)
 
 @app.route("/", methods=["POST", "GET"])
 def root():
     data = request.form
 
-    focusTime = 25
-    breakTime = 5
+    db = openJSON()
+
+    focusTime = db["settings"]["focusTime"]
+    breakTime = db["settings"]["breakTime"]
 
     if "time" in data: # custom time
         if "isParsed" in data: # time is parsed
-            return render_template("index.html", focusTime=data["time"], breakTime=breakTime)
+            focusTime = data["time"]
         else: # time is not parsed, need validation
             time = data["time"]
 
@@ -22,12 +44,16 @@ def root():
                 return render_template("error.html", error="Please enter a valid time. For example: 35, 45s, 15m, 1h.")
             else:
                 if time[-1] not in "smh": # an integer only (represents seconds)
-                    return render_template("index.html", focusTime=int(time), breakTime=breakTime)
+                    focusTime = int(time)
                 else: # with units -> convert to seconds
                     multiplier = {"s": 1, "m": 60, "h": 3600}
-                    return render_template("index.html", focusTime=int(time[:-1])*multiplier[time[-1]], breakTime=breakTime)
+                    focusTime = int(time[:-1]) * multiplier[time[-1]]
     else: # default time
-        return render_template("index.html", focusTime=focusTime, breakTime=breakTime)
+        pass
+
+    saveJSON(db)
+
+    return render_template("index.html", focusTime=focusTime, breakTime=breakTime)
 
 @app.route("/<int:seconds>s")
 @app.route("/<int:seconds>")
@@ -44,7 +70,44 @@ def hours(seconds):
 
 @app.route("/settings")
 def settings():
-    return render_template("settings.html")
+    db = openJSON()
+
+    for i in ["focusTime", "breakTime"]:
+        min = db["settings"][i] // 60
+        sec = db["settings"][i] % 60
+
+        min = "0" + str(min) if min < 10 else str(min)
+        sec = "0" + str(sec) if sec < 10 else str(sec)
+
+        db["settings"][i] = min + ":" + sec
+
+    return render_template("settings.html", focusTime=db["settings"]["focusTime"], breakTime=db["settings"]["breakTime"])
+
+@app.route("/save-settings", methods=["POST"])
+def saveSettings():
+    data = dict(request.form)
+
+    db = openJSON()
+
+    for i in data:
+        time = data[i]
+        if time == "":
+            data[i] = db["settings"][i]
+        elif re.match("\d+[smh]?$", time) is None: # use Regex to validate time inputted
+            return render_template("error.html", error="Please enter a valid time. For example: 35, 45s, 15m, 1h.")
+        else:
+            if time[-1] not in "smh": # an integer only (represents seconds)
+                data[i] = int(time)
+            else: # with units -> convert to seconds
+                multiplier = {"s": 1, "m": 60, "h": 3600}
+                data[i] = int(time[:-1])*multiplier[time[-1]]
+
+    db["settings"]["focusTime"] = data["focusTime"]
+    db["settings"]["breakTime"] = data["breakTime"]
+
+    saveJSON(db)
+
+    return redirect(url_for("settings"))
 
 @app.route("/stats")
 def stats():
