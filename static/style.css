@@ -115,3 +115,8 @@ p {
 .column {
     flex: 50%;
 }
+
+.chart-div {
+    padding-top: 200px;
+    height: 80%;
+}

@@ -1,8 +1,95 @@
 {% extends "template.html" %}
 
-{% block title %}Stats - Pomodoro Timer{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/moment.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chartjs-adapter-moment.js') }}"></script>
+<script src="{{ url_for('static', filename='js/moment-duration-format.js') }}"></script>
+{% endblock %}
+
+{% block title %}Statistics - Pomodoro Timer{% endblock %}
 
 {% block body %}
+<h1 class="title">Statistics</h1>
+<div class="chart-div">
+    <canvas id="chart" width="400" height="400"></canvas>
+    <script>
+        var context = document.getElementById("chart").getContext("2d");
+        var chart = new Chart(context, {
+            type: "bar",
+            data: {
+                labels: {{ labels | safe }},
+                datasets: [
+                    {
+                        label: "Data points",
+                        data: {{ values | safe }},
+                        fill: true,
+                        borderColor: "rgb(75, 192, 192)",
+                        lineTension: 1.0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: 40
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += moment.duration(context.parsed.y, 's').format('HH:mm:ss', { trim: false })
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            font: {
+                                size: 20
+                            },
+                            display: true,
+                            text: "Date"
+                        },
+                        ticks: {
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    y: {
+                        title: {
+                            font: {
+                                size: 20
+                            },
+                            display: true,
+                            text: "Time Focused (HH:mm:ss)"
+                        },
+                        ticks: {
+                            font: {
+                                size: 16
+                            },
+                            callback: function(value, index, values) {
+                                return moment.duration(value, 's').format('HH:mm:ss', {
+                                        trim: false
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        })
+    </script>
+</div>
 
 {% endblock %}
 

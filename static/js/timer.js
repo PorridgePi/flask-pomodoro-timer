@@ -4,6 +4,7 @@ function updateBtnText() {
 
     if ($('#start-btn').prop('disabled')) { // button was disabled
         if (btnText == "Start to Focus") {
+            $.post('/focusStart', {"focusTime": focusTime});
             newBtnText = "Focusing"
         } else if (btnText == "Start your Break") {
             newBtnText = "Enjoy your Break"

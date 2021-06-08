@@ -1,5 +1,6 @@
 import flask, json, re, os
 from flask import render_template, request, url_for, redirect
+from datetime import datetime
 
 app = flask.Flask(__name__)
 
@@ -16,6 +17,9 @@ def openJSON():
             "settings": {
                 "focusTime": 1500, # default focusTime = 25 minutes
                 "breakTime": 300   # default breakTime = 5 minutes
+            },
+            "records": {
+
             }
         }
 
@@ -51,9 +55,21 @@ def root():
     else: # default time
         pass
 
-    saveJSON(db)
-
     return render_template("index.html", focusTime=focusTime, breakTime=breakTime)
+
+@app.route("/focusStart", methods=["POST"])
+def focusStart():
+    data = request.form
+    focusTime = data["focusTime"]
+
+    db = openJSON()
+
+    currentTime = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+
+    db["records"][currentTime] = focusTime
+
+    saveJSON(db)
+    return ('', 204)
 
 @app.route("/<int:seconds>s")
 @app.route("/<int:seconds>")
@@ -111,7 +127,25 @@ def saveSettings():
 
 @app.route("/stats")
 def stats():
-    return render_template("stats.html")
+    db = openJSON()
+
+    records = db["records"]
+
+    data = {}
+
+    for key in records:
+        date = key.split('-')[0]
+        focusTime = int(records[key])
+
+        if date not in data:
+            data[date] = focusTime
+        else:
+            data[date] += focusTime
+
+    labels = [key for key in data]
+    values = [data[key] for key in data]
+
+    return render_template("stats.html", labels=labels, values=values)
 
 @app.errorhandler(404)
 def page_not_found(error):
