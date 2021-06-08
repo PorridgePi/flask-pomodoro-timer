@@ -21,11 +21,8 @@
                 labels: {{ labels | safe }},
                 datasets: [
                     {
-                        label: "Data points",
-                        data: {{ values | safe }},
-                        fill: true,
-                        borderColor: "rgb(75, 192, 192)",
-                        lineTension: 1.0
+                        label: "Time Focused",
+                        data: {{ values | safe }}
                     }
                 ]
             },
