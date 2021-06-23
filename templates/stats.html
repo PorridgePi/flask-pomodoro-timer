@@ -1,10 +1,10 @@
 {% extends "template.html" %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/moment.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/chartjs-adapter-moment.js') }}"></script>
-<script src="{{ url_for('static', filename='js/moment-duration-format.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chart.min.js') }}"></script> <!-- Chart.js to create the stats chart -->
+<script src="{{ url_for('static', filename='js/moment.min.js') }}"></script> <!-- Moment.js to format time -->
+<script src="{{ url_for('static', filename='js/chartjs-adapter-moment.js') }}"></script> <!-- adapter that allows the use of Moment.js with Chart.js -->
+<script src="{{ url_for('static', filename='js/moment-duration-format.js') }}"></script> <!-- format plugin for Moment.js -->
 {% endblock %}
 
 {% block title %}Statistics - Pomodoro Timer{% endblock %}

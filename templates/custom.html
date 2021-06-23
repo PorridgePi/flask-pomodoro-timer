@@ -1,10 +1,12 @@
 {% extends "index.html" %}
 
 {% block scripts %}
+<!-- invisible form with data inputted from Python script -->
 <form name="redirectForm" method="post" action="/">
     <input type="hidden" name="time" value={{ seconds }} />
     <input type="hidden" name="isParsed" value="true"/>
 </form>
 
+<!-- JavaScript that auto-submits the form, which will cause the user to be redirected back to root -->
 <script>document.redirectForm.submit()</script>
 {% endblock %}

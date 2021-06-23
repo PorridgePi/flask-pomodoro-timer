@@ -1,7 +1,7 @@
 <html>
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- responsive viewport -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- css stylesheet -->
         <title>{% block title %}Default title{% endblock %}</title>
 
         {% block scripts %}
@@ -9,7 +9,7 @@
     </head>
     <body>
         <div id="container">
-            <div>
+            <div> <!-- nav bar -->
                 <div class="alignleft">
                     <a class="btn home-btn" href="{{ url_for('root') }}">Home</a>
                     <a class="btn settings-btn" href="{{ url_for('settings') }}">Settings</a>

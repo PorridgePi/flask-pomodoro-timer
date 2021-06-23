@@ -5,6 +5,8 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/timer.js') }}"></script>
+
+<!-- JavaScript to set variables with values from Python -->
 <script>
   var focusTime = {{ focusTime }};
   var breakTime = {{ breakTime }};
@@ -13,14 +15,17 @@
 {% endblock %}
 
 {% block body %}
+<!-- music to be played using JavaSciript (timer.js) after timer ends -->
 <audio id="alarm">
   <source src="{{ url_for('static', filename='alarm.mp3') }}">
 </audio>
 
+<!-- timer text to be updated by JavaScript (timer.js) -->
 <div class="timer">
     <h5 id="time"></h5>
 </div>
 
+<!-- start button -->
 <button class="btn start-btn" id="start-btn" onclick="start()">Start to Focus</button> 
 {% endblock %}
 
