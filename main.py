@@ -153,4 +153,5 @@ def stats():
 def page_not_found(error):
     return render_template("404.html"), 404
 
-app.run(host="0.0.0.0", port=8080, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080, debug=True)
