@@ -4,15 +4,15 @@ from datetime import datetime
 
 app = flask.Flask(__name__)
 
-def openJSON():
+def openJSON(): # open a JSON file, check for corruption, and return a dictionary
     if os.path.exists("data.json"):
         with open("data.json", 'r') as f:
             try:
                 db = json.load(f)
-            except json.decoder.JSONDecodeError:
-                os.remove("data.json") # could prompt for download next time before removing
-                return render_template("error.html", error="JSON config file is corrupted.")
-    else:
+            except json.decoder.JSONDecodeError: # corrupted JSON
+                os.remove("data.json") # in future, could prompt to download a backup version before removing 
+                return render_template("error.html", error="JSON config file is corrupted.") # return error
+    else: # no JSON file present, create empty dictionary
         db = {
             "settings": {
                 "focusTime": 1500, # default focusTime = 25 minutes
@@ -25,70 +25,70 @@ def openJSON():
 
     return db
 
-def saveJSON(db):
+def saveJSON(db): # save a dictionary as a JSON file
     with open('data.json', 'w') as f:
         json.dump(db, f, indent=4, sort_keys=True)
 
-@app.route("/", methods=["POST", "GET"])
+@app.route("/", methods=["POST", "GET"]) # route for root
 def root():
     data = request.form
 
-    db = openJSON()
+    db = openJSON() # open current database
 
-    focusTime = db["settings"]["focusTime"]
-    breakTime = db["settings"]["breakTime"]
+    focusTime = db["settings"]["focusTime"] # get focusTime in settings
+    breakTime = db["settings"]["breakTime"] # get breakTime in settings
 
-    if "time" in data: # custom time
-        if "isParsed" in data: # time is parsed
-            focusTime = data["time"]
+    if "time" in data: # custom time inputted
+        if "isParsed" in data: # time is parsed correctly
+            focusTime = data["time"] 
         else: # time is not parsed, need validation
             time = data["time"]
 
             if re.match("\d+[smh]?$", time) is None: # use Regex to validate time inputted
-                return render_template("error.html", error="Please enter a valid time. For example: 35, 45s, 15m, 1h.")
-            else:
-                if time[-1] not in "smh": # an integer only (represents seconds)
+                return render_template("error.html", error="Please enter a valid time. For example: 35, 45s, 15m, 1h.") # time is invalid, return error
+            else: # time is valid
+                if time[-1] not in "smh": # only an integer is inputted (the integer represents seconds)
                     focusTime = int(time)
-                else: # with units -> convert to seconds
+                else: # time has units -> convert to seconds
                     multiplier = {"s": 1, "m": 60, "h": 3600}
                     focusTime = int(time[:-1]) * multiplier[time[-1]]
-    else: # default time
+    else: # use default time from settings
         pass
 
     return render_template("index.html", focusTime=focusTime, breakTime=breakTime)
 
-@app.route("/focusStart", methods=["POST"])
+@app.route("/focusStart", methods=["POST"]) # route that is requested when the Start to Focus button is pressed
 def focusStart():
     data = request.form
-    focusTime = data["focusTime"]
+    focusTime = data["focusTime"] # get the the focusTime of that session
 
-    db = openJSON()
+    db = openJSON() # open current database
 
-    currentTime = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    currentTime = datetime.now().strftime("%Y%m%d-%H%M%S-%f") # get and format the current time
 
-    db["records"][currentTime] = focusTime
+    db["records"][currentTime] = focusTime # add an record to the database with the currentTime as the key and the focusTime as the value
 
-    saveJSON(db)
-    return ('', 204)
+    saveJSON(db) # save the database into the JSON file
+    return ('', 204) # return 204 No Content
 
-@app.route("/<int:seconds>s")
+@app.route("/<int:seconds>s") # route for custom time in seconds
 @app.route("/<int:seconds>")
 def seconds(seconds):
-    return render_template("custom.html", seconds=seconds)
+    return render_template("custom.html", seconds=seconds) # renders custom.html which will redirect back to root with the inputted time
 
-@app.route("/<int:seconds>m")
+@app.route("/<int:seconds>m") # route for custom time in minutes
 def minutes(seconds):
-    return render_template("custom.html", seconds=seconds*60)
+    return render_template("custom.html", seconds=seconds*60) # renders custom.html which will redirect back to root with the inputted time
 
-@app.route("/<int:seconds>h")
+@app.route("/<int:seconds>h") # route for custom time in hours
 def hours(seconds):
-    return render_template("custom.html", seconds=seconds*3600)
+    return render_template("custom.html", seconds=seconds*3600) # renders custom.html which will redirect back to root with the inputted time
 
-@app.route("/settings")
+@app.route("/settings") # route for settings page
 def settings():
-    db = openJSON()
+    db = openJSON() # open current database
 
-    for i in ["focusTime", "breakTime"]:
+    for i in ["focusTime", "breakTime"]: # obtain the current settings for focusTime and breakTime and format it
         min = db["settings"][i] // 60
         sec = db["settings"][i] % 60
 
@@ -99,55 +99,57 @@ def settings():
 
     return render_template("settings.html", focusTime=db["settings"]["focusTime"], breakTime=db["settings"]["breakTime"])
 
-@app.route("/save-settings", methods=["POST"])
+@app.route("/save-settings", methods=["POST"]) # route to save settings
 def saveSettings():
     data = dict(request.form)
 
-    db = openJSON()
+    db = openJSON() # open current database
 
-    for i in data:
+    for i in data: # two data - focusTime and breakTime
         time = data[i]
-        if time == "":
-            data[i] = db["settings"][i]
+        if time == "": # blank response -> leave settings as it is
+            data[i] = db["settings"][i] 
         elif re.match("\d+[smh]?$", time) is None: # use Regex to validate time inputted
-            return render_template("error.html", error="Please enter a valid time. For example: 35, 45s, 15m, 1h.")
-        else:
-            if time[-1] not in "smh": # an integer only (represents seconds)
+            return render_template("error.html", error="Please enter a valid time. For example: 35, 45s, 15m, 1h.") # time is invalid, return error
+        else: # time is valid
+            if time[-1] not in "smh": # only an integer is inputted (the integer represents seconds)
                 data[i] = int(time)
-            else: # with units -> convert to seconds
+            else: # time has units -> convert to seconds
                 multiplier = {"s": 1, "m": 60, "h": 3600}
                 data[i] = int(time[:-1])*multiplier[time[-1]]
 
+    # make changes to the database
     db["settings"]["focusTime"] = data["focusTime"]
     db["settings"]["breakTime"] = data["breakTime"]
 
-    saveJSON(db)
+    saveJSON(db) # save the database into the JSON file
 
     return redirect(url_for("settings"))
 
-@app.route("/stats")
+@app.route("/stats") # route for the stats page
 def stats():
-    db = openJSON()
+    db = openJSON() # open current database
 
     records = db["records"]
 
-    data = {}
+    data = {} # data obtained after manipulation of the records
 
     for key in records:
-        date = key.split('-')[0]
-        focusTime = int(records[key])
+        date = key.split('-')[0] # get date
+        focusTime = int(records[key]) # get focusTime
 
+        # sum up the focusTime for each date
         if date not in data:
             data[date] = focusTime
         else:
             data[date] += focusTime
 
-    labels = [key for key in data]
-    values = [data[key] for key in data]
+    labels = [key for key in data] # labels are the dates
+    values = [data[key] for key in data] # values are the focusTime
 
     return render_template("stats.html", labels=labels, values=values)
 
-@app.errorhandler(404)
+@app.errorhandler(404) # route for 404 error
 def page_not_found(error):
     return render_template("404.html"), 404
 
