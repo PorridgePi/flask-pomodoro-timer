@@ -60,7 +60,7 @@ def root():
 @app.route("/focusStart", methods=["POST"]) # route that is requested when the Start to Focus button is pressed
 def focusStart():
     data = request.form
-    focusTime = data["focusTime"] # get the the focusTime of that session
+    focusTime = int(data["focusTime"]) # get the the focusTime of that session
 
     db = openJSON() # open current database
 
@@ -136,7 +136,7 @@ def stats():
 
     for key in records:
         date = key.split('-')[0] # get date
-        focusTime = int(records[key]) # get focusTime
+        focusTime = records[key] # get focusTime
 
         # sum up the focusTime for each date
         if date not in data:
